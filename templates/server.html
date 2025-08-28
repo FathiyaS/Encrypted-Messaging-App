@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Server View — Ciphertext</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;font-family:Inter,system-ui,Segoe UI,Roboto}
+  body{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0b1220;margin:0;padding:24px;color:#eaf7f6}
+  .card{max-width:980px;width:100%;background:#121a2b;border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,.5);padding:16px}
+  h1{margin:0 0 10px}
+  .item{padding:12px;border-radius:12px;background:#1a253b;margin:8px 0}
+  .meta{font-size:12px;opacity:.8;margin-bottom:6px}
+  .cipher{word-wrap:break-word}
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>🖥 Server View (Encrypted only)</h1>
+    <p style="opacity:.85">Server cuma lihat ini (ciphertext + IV), tanpa passphrase jadi tidak bisa membaca pesan.</p>
+    {% for m in messages %}
+      <div class="item">
+        <div class="meta">{{ m.ts }} • from <b>{{ m.sender }}</b> • room <b>{{ m.room }}</b> • iv=<code>{{ m.iv }}</code></div>
+        <div class="cipher"><code>{{ m.ciphertext }}</code></div>
+      </div>
+    {% else %}
+      <p style="opacity:.75">Belum ada pesan.</p>
+    {% endfor %}
+  </div>
+</body>
+</html>

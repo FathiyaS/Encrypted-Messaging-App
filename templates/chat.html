@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chat — {{ username }}</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ========== Base Reset ========== */
+  * {
+    box-sizing: border-box;
+    font-family: Inter, system-ui, Segoe UI, Roboto;
+  }
+
+  body {
+    min-height: 100vh;
+    margin: 0;
+    padding: 18px;
+    background: linear-gradient(135deg, #0f172a, #0ea5a4);
+    color: #eaf7f6;
+    
+  }
+
+  /* ========== Layout ========== */
+  .layout {
+    max-width: 100%;
+    padding-top: 30px;
+    padding-inline: 30px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 16px;
+  }
+
+  .panel {
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(6px);
+    border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(2, 6, 23, 0.5);
+    padding: 16px;
+  }
+
+  /* ========== Typography ========== */
+  h2 {
+    margin: 0 0 8px;
+    font-size: 18px;
+  }
+
+  label {
+    font-size: 12px;
+    opacity: 0.9;
+  }
+
+  .muted {
+    font-size: 12px;
+    opacity: 0.85;
+  }
+
+  /* ========== Inputs & Buttons ========== */
+  input[type=text] {
+    width: 100%;
+    padding: 10px;
+    margin-top: 6px;
+    border: none;
+    border-radius: 10px;
+  }
+
+  textarea {
+    width: 100%;
+    height: 70px;
+    padding: 10px;
+    border: none;
+    border-radius: 10px;
+  }
+
+  .btn {
+    padding: 10px 12px;
+    border: none;
+    border-radius: 10px;
+    background: #06b6d4;
+    color: #042f2e;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .btn.ghost {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #c5fbf7;
+  }
+
+  /* ========== Room Info & Layout Helpers ========== */
+  .roominfo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .row {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  /* ========== Messages & Bubbles ========== */
+  .messages {
+    height: 60vh;
+    overflow: auto;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 12px;
+  }
+
+  .item {
+    display: flex;
+    margin: 8px 0;
+  }
+
+  .left {
+    justify-content: flex-start;
+  }
+
+  .right {
+    justify-content: flex-end;
+  }
+
+  .bubble {
+    max-width: 68%;
+    padding: 10px 12px;
+    border-radius: 14px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  }
+
+  .mine {
+    background: linear-gradient(90deg, #34d399, #10b981);
+    color: #052e2b;
+  }
+
+  .theirs {
+    background: rgba(255, 255, 255, 0.08);
+    color: #e6fffb;
+  }
+
+  .meta {
+    font-size: 11px;
+    opacity: 0.85;
+    margin-bottom: 4px;
+  }
+</style>
+
+</head>
+<body>
+  <div class="layout">
+    <!-- LEFT: controls -->
+    <div class="panel">
+      <h2>🔐 {{ username }}</h2>
+      <div class="muted">Room: <b>{{ room }}</b></div>
+      <hr style="border-color:rgba(255,255,255,.08);margin:12px 0">
+      <label>Passphrase (local only)</label>
+      <input id="passphrase" type="text" placeholder="type shared secret">
+      <div class="row">
+        <button class="btn" id="bindKey">Bind Key</button>
+        <a class="btn ghost" href="/logout">Logout</a>
+      </div>
+      <p class="muted">Kunci diturunkan lokal (PBKDF2) dan tidak dikirim ke server.</p>
+      <hr style="border-color:rgba(255,255,255,.08);margin:12px 0">
+      <button class="btn ghost" id="serverView" onclick="window.open('/server','_blank')">Open Server View</button>
+    </div>
+
+    <!-- RIGHT: chat -->
+    <div class="panel">
+      <div class="roominfo">
+        <h2>Room Chat</h2>
+        <div class="muted" id="status">No key</div>
+      </div>
+      <div class="messages" id="box"></div>
+      <div class="row">
+        <textarea id="msg" placeholder="Type message..."></textarea>
+        <button class="btn" id="send">Send</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // ====== WebCrypto helpers (AES-GCM E2EE) ======
+  const enc = new TextEncoder(); const dec = new TextDecoder();
+  let cryptoKey = null;
+
+  function toB64(buf){ const b = new Uint8Array(buf); let s=""; for(const x of b){s+=String.fromCharCode(x)} return btoa(s); }
+  function fromB64(b64){ const s = atob(b64); const b = new Uint8Array(s.length); for(let i=0;i<s.length;i++) b[i]=s.charCodeAt(i); return b.buffer; }
+
+  async function deriveKey(pass, saltStr){
+    const pw = await crypto.subtle.importKey("raw", enc.encode(pass), {name:"PBKDF2"}, false, ["deriveKey"]);
+    return crypto.subtle.deriveKey(
+      {name:"PBKDF2", salt: enc.encode(saltStr), iterations: 200000, hash:"SHA-256"},
+      pw, {name:"AES-GCM", length:256}, false, ["encrypt","decrypt"]
+    );
+  }
+
+  async function encryptText(text){
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const ct = await crypto.subtle.encrypt({name:"AES-GCM", iv}, cryptoKey, enc.encode(text));
+    return {ciphertext: toB64(ct), iv: toB64(iv)};
+  }
+
+  async function decryptText(ciphertextB64, ivB64){
+    try{
+      const pt = await crypto.subtle.decrypt({name:"AES-GCM", iv: new Uint8Array(fromB64(ivB64))}, cryptoKey, fromB64(ciphertextB64));
+      return dec.decode(pt);
+    }catch(e){ return null; }
+  }
+
+  // ====== App state ======
+  const username = {{ username|tojson }};
+  const room = {{ room|tojson }};
+  const statusEl = document.getElementById("status");
+  const box = document.getElementById("box");
+  const msgEl = document.getElementById("msg");
+
+  document.getElementById("bindKey").addEventListener("click", async ()=>{
+    const pass = document.getElementById("passphrase").value;
+    if(!pass){ alert("Isi passphrase"); return; }
+    cryptoKey = await deriveKey(pass, "room:"+room);
+    statusEl.textContent = "Key bound ✓";
+    fetchAndRender();
+  });
+
+  document.getElementById("send").addEventListener("click", async ()=>{
+    if(!cryptoKey){ alert("Bind passphrase dulu"); return; }
+    const text = msgEl.value.trim(); if(!text) return;
+    const {ciphertext, iv} = await encryptText(text);
+    await fetch("/api/send",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ciphertext, iv})});
+    msgEl.value = "";
+    await fetchAndRender(true);
+  });
+
+  let lastCount = 0; // tambahin di luar fungsi, biar global
+
+async function fetchAndRender(scrollBottom=false){
+  const res = await fetch("/api/messages");
+  const data = await res.json();
+
+  // ambil hanya pesan baru
+  const newMsgs = data.messages.slice(lastCount);
+  lastCount = data.messages.length;
+
+  for(const m of newMsgs){
+    let side = (m.sender === username) ? "right" : "left";
+    let bubbleClass = (m.sender === username) ? "bubble mine" : "bubble theirs";
+    let plain = cryptoKey ? await decryptText(m.ciphertext, m.iv) : null;
+
+    const wrap = document.createElement("div");
+    wrap.className = "item " + side;
+
+    const b = document.createElement("div");
+    b.className = bubbleClass;
+    const meta = document.createElement("div");
+    meta.className = "meta";
+    meta.textContent = `${m.sender} • ${new Date(m.ts).toLocaleTimeString()}`;
+    const body = document.createElement("div");
+    body.textContent = plain ?? m.ciphertext;
+
+    b.appendChild(meta); 
+    b.appendChild(body); 
+    wrap.appendChild(b);
+    box.appendChild(wrap);
+  }
+
+  if(scrollBottom || newMsgs.length > 0) {
+    box.scrollTop = box.scrollHeight;
+  }
+}
+
+
+  // auto refresh tiap 2.5s
+  setInterval(()=>{ fetchAndRender(); }, 2500);
+  // initial
+  fetchAndRender();
+</script>
+</body>
+</html>
