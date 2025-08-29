@@ -56,7 +56,7 @@ h1 {
 <body>
   <div class="card">
     <h1>🖥 Server View (Encrypted only)</h1>
-    <p style="opacity:.85">Server cuma lihat ini (ciphertext + IV), tanpa passphrase jadi tidak bisa membaca pesan.</p>
+    <p style="opacity:.85">ciphertext + IV</p>
     {% for m in messages %}
       <div class="item">
         <div class="meta">{{ m.ts }} • from <b>{{ m.sender }}</b> • room <b>{{ m.room }}</b> • iv=<code>{{ m.iv }}</code></div>
