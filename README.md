@@ -19,7 +19,7 @@ The server only stores encrypted messages, ensuring privacy.
 ## ✨ Features
 - 🔑 **End-to-End Encryption** — Messages are encrypted before leaving the browser.  
 - 💬 **Real-time Messaging** — Auto-refreshing chat view.  
-- 🖥 **Two-sided UI** — Each user sees their messages aligned right, others’ on the left.  
+- 🖥 **Two-sided UI** — Pov between two side of senders.  
 - 🔍 **Server View Mode** — Optional mode to see raw encrypted messages.
 
 ---
@@ -35,9 +35,9 @@ The server only stores encrypted messages, ensuring privacy.
 
 ├── app.py
 ├── templates/
-    ├── chat.html        # Main chat UI
-    ├── login.html       # Login page
-    └── server.html      # Server/ciphertext view
+    ├── chat.html
+    ├── login.html
+    └── server.html
 └── README.md
 
 ---
