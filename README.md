@@ -32,14 +32,12 @@ The server only stores encrypted messages, ensuring privacy.
 ---
 
 ## 📂 Project Structure
-
-├── app.py
-├── templates/
-    ├── chat.html
-    ├── login.html
-    └── server.html
-└── README.md
-
+├── app.py         
+├── templates/           
+├────── chat.html   
+├────── login.html
+├────── server.html
+└── README.md       
 ---
 
 ## 🔐 How Encryption Works
@@ -65,13 +63,14 @@ The server only stores encrypted messages, ensuring privacy.
 
 ---
 ## 📸 Preview
-###Login
+### Login
 ![Login Screenshot](screenshots/login.png)
 
-###Chat interface
-![Chat interface Screenshot](screenshots/chat.png)
+### Chat interface
+![Chat interface Screenshot](screenshots/user1.png)
+![Chat2 interface Screenshot](screenshots/user2.png)
 
-###Server View
+### Server View
 ![Server View Screenshot](screenshots/server.png)
 
 
