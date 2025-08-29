@@ -58,7 +58,7 @@ The server only stores encrypted messages, ensuring privacy.
 9. Start sending encrypted messages
 10. To open server view you can add /server
     ```bash
-    http://127.0.0.1:5000server
+    http://127.0.0.1:5000/server
 
 ---
 ## 📸 Preview
