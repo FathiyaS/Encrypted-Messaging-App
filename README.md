@@ -42,14 +42,23 @@ The server only stores encrypted messages, ensuring privacy.
 ## 🚀 How to Run
 1. Clone the repo:  
    ```bash
-   git clone https://github.com/your-username/e2ee-chat-app.git
-   cd e2ee-chat-app
+   git clone https://github.com/FathiyaS/Encrypted-Messaging-App.git
+   
 2. Install dependencies
-3. Run the server (app.py)
-4. Open in browser
-5. Enter username & room name
-6. Bind a shared passphrase with chat partner
-7. start sending encrypted messages
+   ```bash
+   pip install flask
+   
+4. Run the server (app.py)
+5. Open in browser
+   ```bash
+   http://127.0.0.1:5000
+   
+7. Enter username & room name
+8. Bind a shared passphrase with chat partner
+9. Start sending encrypted messages
+10. To open server view you can add /server
+    ```bash
+    http://127.0.0.1:5000server
 
 ---
 ## 📸 Preview
