@@ -9,7 +9,6 @@ The server only stores encrypted messages, ensuring privacy.
 ## 📑 Table of Contents
 - [✨ Features](#-features)  
 - [🛠️ Tech Stack](#️-tech-stack)  
-- [📂 Project Structure](#-project-structure)  
 - [🔐 How Encryption Works](#-how-encryption-works)  
 - [🚀 How to Run](#-how-to-run)  
 - [📸 Preview](#-preview)  
@@ -20,7 +19,7 @@ The server only stores encrypted messages, ensuring privacy.
 - 🔑 **End-to-End Encryption** — Messages are encrypted before leaving the browser.  
 - 💬 **Real-time Messaging** — Auto-refreshing chat view.  
 - 🖥 **Two-sided UI** — Pov between two side of senders.  
-- 🔍 **Server View Mode** — Optional mode to see raw encrypted messages.
+- 🔍 **Server View Mode** — To see raw encrypted messages on server pov.
 
 ---
 
@@ -29,15 +28,6 @@ The server only stores encrypted messages, ensuring privacy.
 - **Backend**: Python (Flask)
 - **Encryption**: WebCrypto API (AES-GCM, PBKDF2)
 
----
-
-## 📂 Project Structure
-├── app.py         
-├── templates/           
-├────── chat.html   
-├────── login.html
-├────── server.html
-└── README.md       
 ---
 
 ## 🔐 How Encryption Works
